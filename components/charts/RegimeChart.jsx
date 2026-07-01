@@ -3,10 +3,10 @@
 import { signedPercent } from '@/utils/formatters';
 
 const REGIME_LAYOUT = [
-  { key: 'growth_low_inflation', label: 'Growth + Low Inflation', col: 1, row: 1 },
-  { key: 'growth_high_inflation', label: 'Growth + High Inflation', col: 2, row: 1 },
-  { key: 'contraction_low_inflation', label: 'Contraction + Low Inflation', col: 1, row: 2 },
-  { key: 'contraction_high_inflation', label: 'Contraction + High Inflation', col: 2, row: 2 },
+  { key: 'Growth_LowInflation', label: 'Growth + Low Inflation', col: 1, row: 1 },
+  { key: 'Growth_HighInflation', label: 'Growth + High Inflation', col: 2, row: 1 },
+  { key: 'Contraction_LowInflation', label: 'Contraction + Low Inflation', col: 1, row: 2 },
+  { key: 'Stagflation', label: 'Stagflation', col: 2, row: 2 },
 ];
 
 function returnColor(val) {

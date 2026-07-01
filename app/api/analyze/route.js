@@ -60,10 +60,30 @@ export async function POST(request) {
     }
 
     try {
-      regime = await calculateRegimeResults(positions);
+      const rawRegime = await calculateRegimeResults(positions);
+      // Normalize to frontend-expected shape
+      const perf = rawRegime.performance_by_regime || {};
+      const rawSignals = rawRegime.current_regime?.signals ?? {};
+      const sortedByReturn = Object.entries(perf)
+        .filter(([, v]) => v.annual_return != null)
+        .sort((a, b) => a[1].annual_return - b[1].annual_return);
+      const worstEntry = sortedByReturn[0];
+      regime = {
+        regime_performance: perf,
+        current_regime_signals: {
+          yield_curve: rawSignals.yieldCurve ?? null,
+          inflation_breakeven: rawSignals.inflationBreakeven ?? null,
+          credit_spread: rawSignals.creditSpread ?? null,
+          vix_term: rawSignals.vix ?? null,
+        },
+        current_regime_probabilities: rawRegime.current_regime?.probabilities ?? {},
+        most_likely_regime: rawRegime.current_regime?.dominant_regime ?? null,
+        worst_regime: worstEntry?.[0] ?? null,
+        worst_regime_return: worstEntry?.[1]?.annual_return ?? 0,
+      };
     } catch (e) {
       errors.push(`regime: ${e.message}`);
-      regime = { regime_performance: {}, current_regime_signals: {}, current_regime_probabilities: {}, most_likely_regime: 'Unknown', worst_regime: 'Unknown', worst_regime_return: 0 };
+      regime = { regime_performance: {}, current_regime_signals: {}, current_regime_probabilities: {}, most_likely_regime: null, worst_regime: null, worst_regime_return: 0 };
     }
 
     try {
@@ -71,7 +91,7 @@ export async function POST(request) {
       behavioral = calculateBehavioralResults(positions, priceData, xray.geography ?? { US: 1 }, xray.effective_holdings ?? []);
     } catch (e) {
       errors.push(`behavioral: ${e.message}`);
-      behavioral = { home_bias: { flag: false }, concentration: { flag: false }, kelly: [], implicit_leverage: { has_leveraged_etf: false, effective_market_exposure: 1 }, recency_bias: { flag: false }, behavioral_flags: [] };
+      behavioral = { home_bias: { flag: false }, concentration: { flag: false }, kelly: { by_ticker: {}, over_bet_positions: [], has_over_bet: false }, implicit_leverage: { has_leveraged_etf: false, effective_market_exposure: 1 }, recency_bias: { flag: false }, behavioral_flags: [] };
     }
 
     try {
