@@ -15,14 +15,17 @@ const FLAG_INFO = {
 export default function BehavioralAudit({ data }) {
   if (!data) return <div className="text-gray-500 text-sm">Insufficient data.</div>;
 
-  const { home_bias = {}, concentration = {}, kelly = [], implicit_leverage = {}, recency_bias = {}, behavioral_flags = [] } = data;
+  const { home_bias = {}, concentration = {}, kelly = {}, implicit_leverage = {}, recency_bias = {}, behavioral_flags = [] } = data;
 
-  const kellyData = kelly.filter(k => k.kelly_fraction > 0).map(k => ({
-    ticker: k.ticker,
-    x: Math.round(k.kelly_fraction * 1000) / 10,
-    y: Math.round(k.actual_weight * 1000) / 10,
-    flag: k.flag,
-  }));
+  const kellyByTicker = kelly?.by_ticker ?? {};
+  const kellyData = Object.entries(kellyByTicker)
+    .filter(([, k]) => k.kelly_fraction > 0)
+    .map(([ticker, k]) => ({
+      ticker,
+      x: Math.round(k.kelly_fraction * 1000) / 10,
+      y: Math.round(k.actual_weight * 1000) / 10,
+      flag: k.is_over_bet ? 'OVERBET' : k.is_over_bet === false ? 'UNDERBET' : 'OK',
+    }));
 
   const usWeight = home_bias.user_us_weight ?? 0;
   const globalWeight = home_bias.global_benchmark ?? 0.62;
