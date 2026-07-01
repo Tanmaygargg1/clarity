@@ -80,9 +80,9 @@ export default function XRay({ data }) {
               {effective_holdings.slice(0, 10).map((h) => (
                 <tr key={h.ticker} className="border-b border-gray-800/50">
                   <td className="py-2 font-mono text-blue-400">{h.ticker}</td>
-                  <td className="py-2 text-right font-mono text-gray-300">{formatPercent(h.effective_weight)}</td>
+                  <td className="py-2 text-right font-mono text-gray-300">{formatPercent(h.weight)}</td>
                   <td className="py-2 pl-4 text-xs text-gray-500">
-                    {h.direct ? 'Direct' : `via ${(h.via_etfs || []).join(', ')}`}
+                    {h.sector || h.geography || '—'}
                   </td>
                 </tr>
               ))}

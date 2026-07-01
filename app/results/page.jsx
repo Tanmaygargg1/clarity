@@ -9,6 +9,16 @@ import RiskDecomposition from '@/components/analysis/RiskDecomposition';
 import FactorAnalysis from '@/components/analysis/FactorAnalysis';
 import RegimeStressTest from '@/components/analysis/RegimeStressTest';
 import BehavioralAudit from '@/components/analysis/BehavioralAudit';
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
+
+const SECTIONS = [
+  { Component: Verdict, key: 'verdict', label: 'Verdict' },
+  { Component: XRay, key: 'xray', label: 'X-Ray' },
+  { Component: RiskDecomposition, key: 'risk', label: 'Risk Decomposition' },
+  { Component: FactorAnalysis, key: 'factors', label: 'Factor Analysis' },
+  { Component: RegimeStressTest, key: 'regime', label: 'Regime Stress Test' },
+  { Component: BehavioralAudit, key: 'behavioral', label: 'Behavioral Audit' },
+];
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -19,15 +29,6 @@ export default function ResultsPage() {
   }, [results, router]);
 
   if (!results) return <div className="min-h-screen bg-[#0D0F12]" />;
-
-  const sections = [
-    { component: Verdict, data: results.verdict, key: 'verdict' },
-    { component: XRay, data: results.xray, key: 'xray' },
-    { component: RiskDecomposition, data: results.risk, key: 'risk' },
-    { component: FactorAnalysis, data: results.factors, key: 'factors' },
-    { component: RegimeStressTest, data: results.regime, key: 'regime' },
-    { component: BehavioralAudit, data: results.behavioral, key: 'behavioral' },
-  ];
 
   return (
     <div className="min-h-screen bg-[#0D0F12] text-gray-100">
@@ -42,9 +43,11 @@ export default function ResultsPage() {
           </button>
         </div>
 
-        {sections.map(({ component: Component, data, key }) => (
+        {SECTIONS.map(({ Component, key, label }) => (
           <div key={key} className="bg-[#161820] rounded-lg p-6 mb-6">
-            <Component data={data} />
+            <ErrorBoundary name={label}>
+              <Component data={results[key]} />
+            </ErrorBoundary>
           </div>
         ))}
 

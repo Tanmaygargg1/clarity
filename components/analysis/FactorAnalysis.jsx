@@ -7,9 +7,18 @@ import { formatPercent, formatDecimal } from '@/utils/formatters';
 export default function FactorAnalysis({ data }) {
   if (!data) return <div className="text-gray-500 text-sm">Insufficient data.</div>;
 
-  const { alpha_annual = 0, alpha_pvalue = 1, r_squared = 0, factor_loadings = {}, return_attribution = {}, blended_expense_ratio = 0, factor_replication_cost = 0.001, excess_cost = 0 } = data;
+  const {
+    alpha_annual = 0,
+    alpha_pvalue = 1,
+    r_squared = 0,
+    factor_loadings = [],
+    blended_expense_ratio = 0,
+    factor_replication_cost = 0.001,
+    excess_cost = 0,
+  } = data;
 
-  const alphaInsignificant = alpha_pvalue > 0.05;
+  const safePvalue = alpha_pvalue ?? 1;
+  const alphaInsignificant = safePvalue > 0.05;
 
   return (
     <div>
@@ -18,7 +27,7 @@ export default function FactorAnalysis({ data }) {
       {alphaInsignificant && (
         <div className="mb-6 p-4 bg-yellow-900/20 border border-yellow-800 rounded-lg">
           <p className="text-yellow-300 text-sm">
-            Your alpha is not statistically significant (p={alpha_pvalue.toFixed(2)}). Factor models explain{' '}
+            Your alpha is not statistically significant (p={safePvalue.toFixed(2)}). Factor models explain{' '}
             <span className="font-mono">{formatPercent(r_squared)}</span> of your returns — you are paying for market exposure, not skill.
           </p>
         </div>
@@ -28,7 +37,7 @@ export default function FactorAnalysis({ data }) {
         <div className="bg-[#0D0F12] border border-gray-800 rounded-lg p-3">
           <p className="text-xs text-gray-500 mb-1">Alpha (annual)</p>
           <p className={`font-mono text-lg ${alpha_annual > 0 && !alphaInsignificant ? 'text-green-400' : 'text-gray-400'}`}>{formatPercent(alpha_annual)}</p>
-          <p className="text-xs text-gray-600">p={alpha_pvalue.toFixed(3)}</p>
+          <p className="text-xs text-gray-600">p={safePvalue.toFixed(3)}</p>
         </div>
         <div className="bg-[#0D0F12] border border-gray-800 rounded-lg p-3">
           <p className="text-xs text-gray-500 mb-1">R²</p>
@@ -42,9 +51,11 @@ export default function FactorAnalysis({ data }) {
         </div>
       </div>
 
-      <div className="mb-6">
-        <FactorBar factorLoadings={factor_loadings} returnAttribution={return_attribution} />
-      </div>
+      {Array.isArray(factor_loadings) && factor_loadings.length > 0 && (
+        <div className="mb-6">
+          <FactorBar factorLoadings={factor_loadings} />
+        </div>
+      )}
 
       {(blended_expense_ratio > 0 || excess_cost > 0) && (
         <div className="bg-[#0D0F12] border border-gray-800 rounded-lg p-4">
