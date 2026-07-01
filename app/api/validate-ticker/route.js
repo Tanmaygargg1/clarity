@@ -8,6 +8,6 @@ export async function POST(request) {
     const result = await validateTicker(ticker.toUpperCase());
     return NextResponse.json(result);
   } catch (err) {
-    return NextResponse.json({ valid: false, error: err.message }, { status: 500 });
+    return NextResponse.json({ valid: false, error: err.message, stack: err.stack?.split('\n')[0] }, { status: 500 });
   }
 }
